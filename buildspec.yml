@@ -2,9 +2,9 @@ version: 0.2
 
 env:
   parameter-store:
-    DOCKER_REGISTRY_USERNAME: /myapp/docker-credentials/username                     #docker username which stored in systems manager securly
-    DOCKER_REGISTRY_PASSWORD: /myapp/docker-credentials/password                     #docker password which stored in systems manager securly
-    DOCKER_REGISTRY_URL: /myapp/docker-registry/url                                  #docker url which stored in systems manager securly
+    DOCKER_REGISTRY_USERNAME: /pythonapp/docker-credentials/username                     #docker username which stored in systems manager securly
+    DOCKER_REGISTRY_PASSWORD: /pythonapp/docker-credentials/password                     #docker password which stored in systems manager securly
+    DOCKER_REGISTRY_URL: /pythonapp/docker-registry/url                                  #docker url which stored in systems manager securly
 phases:
   install:
     runtime-versions:
