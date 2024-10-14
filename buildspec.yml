@@ -1,26 +1,31 @@
 version: 0.2
 
-env:
-  parameter-store:
-    DOCKER_REGISTRY_USERNAME: /pythonapp/docker-credentials/username                     #docker username which stored in systems manager securly
-    DOCKER_REGISTRY_PASSWORD: /pythonapp/docker-credentials/password                     #docker password which stored in systems manager securly
-    DOCKER_REGISTRY_URL: /pythonapp/docker-registry/url                                  #docker url which stored in systems manager securly
 phases:
   install:
     runtime-versions:
-      python: 3.11
+      python: 3.12
   pre_build:
     commands:
       - echo "Installing dependencies..."
       - pip install -r requirements.txt
+      - echo "Retrieving secrets from AWS Secrets Manager..."
+      - SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id /pythonapp/dockerhub_credential --query SecretString --output text)
+      - export USERNAME=$(echo $SECRET_JSON | jq -r '.username')
+      - echo "USERNAME:$USERNAME"
+      - export PASSWORD=$(echo $SECRET_JSON | jq -r '.password')
+      #- echo "PASSWORD:$PASSWORD"
+      - export URL=$(echo $SECRET_JSON | jq -r '.url')
+      #- export URL="docker.io"
+      - echo "URL:$URL"
   build:
     commands:
       - echo "Running tests..."
-      #- cd day-13/simple-python-app/                     //if your application directory inside the main directory then you have given full path of code
       - echo "Building Docker image..."
-      - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY_URL"
-      - docker build -t "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/simple-python-flask-app:latest" .
-      - docker push "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/simple-python-flask-app:latest"
+      - echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin "$URL"
+      - docker build -t "$URL/$USERNAME/simple-python-flask-app:latest" .
+      - echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
+      - docker push "docker.io/krish9130/simple-python-flask-app:latest"
+      
   post_build:
     commands:
       - echo "Build completed successfully!"
